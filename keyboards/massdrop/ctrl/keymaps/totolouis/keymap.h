@@ -57,7 +57,7 @@ enum layout_names {
 
 enum tapdance_keycodes {
     TD_LGUI_ML = 0,     // Tap dance key to switch to mouse layer _ML
-    TD_CTRL_TERM,       // Tap dance key to open terminal on LCTRL double press
+    TD_CTRL_GL,       // Tap dance key to open terminal on LCTRL double press
 };
 
 enum ctrl_keycodes {
@@ -75,11 +75,16 @@ enum ctrl_keycodes {
     ROUT_FM,               // RGB timeout fast mode toggle
     COPY_ALL,              // Copy all text using ctrl(a+c)
     TERMINAL,              // CTRL+ALT+T
+    ACT_A,                 // Accent à fr
+	ACT_C,                 // Accent ç fr
+	ACT_E1,                // Accent é fr
+    ACT_E2,                // Accent è fr
+    ACT_U,                 // Accent ù fr
 };
 
 enum string_macro_keycodes {
     // The start of this enum should always be equal to end of ctrl_keycodes + 1
-    G_INIT = TERMINAL + 1, // git init
+    G_INIT = ACT_U + 1, // git init
     G_CLONE,               // git clone
     G_CONF,                // git config --global
     G_ADD,                 // git add

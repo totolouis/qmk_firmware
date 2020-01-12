@@ -4,13 +4,27 @@ static uint16_t idle_timer;             // Idle LED timeout timer
 static uint8_t idle_second_counter;     // Idle LED seconds counter, counts seconds not milliseconds
 static uint8_t key_event_counter;       // This counter is used to check if any keys are being held
 
-enum custom_keycodes {
-	ACT_A,
-	ACT_C,
-	ACT_E1,
-    ACT_E2
+static const char * sendstring_commands[] = {
+    "git init ",
+    "git clone ",
+    "git config --global ",
+    "git add ",
+    "git diff ",
+    "git reset ",
+    "git rebase ",
+    "git branch -b \"",
+    "git checkout ",
+    "git merge ",
+    "git remote add ",
+    "git fetch ",
+    "git pull ",
+    "git push ",
+    "git commit ",
+    "git status ",
+    "git log ",
 };
 
+// Stuff for alt code
 bool g_bOsNumLockOn = false;
 
 void led_set_user(uint8_t usb_led) {
@@ -130,12 +144,12 @@ void send_altcode(uint16_t mask, keyrecord_t *record) {
 			send_keyboard_report();
 	}
 }
-
+// End stuff for alt code
 
 //Associate our tap dance key with its functionality
 qk_tap_dance_action_t tap_dance_actions[] = {
     [TD_LGUI_ML] = ACTION_TAP_DANCE_LAYER_TOGGLE(KC_LGUI, _ML),
-    [TD_CTRL_TERM] = ACTION_TAP_DANCE_DOUBLE(KC_LCTRL, LCA(KC_T)),
+    [TD_CTRL_GL] = ACTION_TAP_DANCE_LAYER_TOGGLE(KC_LCTRL, _GL),
 };
 
 const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
@@ -155,24 +169,31 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
         KC_TAB,            KC_Q,           KC_W,    KC_E,    KC_R,    KC_T,    KC_Y,    KC_U,    KC_I,    KC_O,    KC_P,    KC_LBRC,   KC_RBRC, KC_BSLS,   KC_DEL,  KC_END,  KC_PGDN,
         KC_CAPS,           KC_A,           KC_S,    KC_D,    KC_F,    KC_G,    KC_H,    KC_J,    KC_K,    KC_L,    KC_SCLN, KC_QUOT,   KC_ENT,
         KC_LSFT,           KC_Z,           KC_X,    KC_C,    KC_V,    KC_B,    KC_N,    KC_M,    KC_COMM, KC_DOT,  KC_SLSH, KC_SFTENT,                              KC_UP,
-        TD(TD_CTRL_TERM),  TD(TD_LGUI_ML), KC_LALT,                   KC_SPC,                             KC_RALT, TT(_FL), KC_APP,    KC_RCTL,            KC_LEFT, KC_DOWN, KC_RGHT
+        TD(TD_CTRL_GL),  TD(TD_LGUI_ML), KC_LALT,                   KC_SPC,                             KC_RALT, TT(_FL), KC_APP,    KC_RCTL,            KC_LEFT, KC_DOWN, KC_RGHT
     ),
-    // BE CAREFUL WHEN CHANGING THIS LAYOUT. The key ù is link to this layer.
     [_FL] = LAYOUT(
-        DBG_TOG, KC_MUTE, KC_VOLD, KC_VOLU,  KC_MPRV, KC_MPLY, KC_MNXT, KC_BRID,  KC_BRIU,  RGB_VAD, RGB_VAI, RGB_TOG, RGB_MOD,            _______, TERM_ON, TERM_OFF,
-        _______, ACT_E1, ACT_E2  , ACT_C  , ACT_A  , _______  , _______, _______,  _______,  ROUT_FM, ROUT_TG, ROUT_VD, ROUT_VI, _______,   _______, _______, _______,
+        _______, KC_MUTE, KC_VOLD, KC_VOLU,  KC_MPRV, KC_MPLY, KC_MNXT, KC_BRID,  KC_BRIU,  RGB_VAD, RGB_VAI, RGB_TOG, RGB_MOD,            _______, TERM_ON, TERM_OFF,
+        _______, ACT_E1, ACT_E2  , ACT_C  , ACT_A  , ACT_U  , _______, _______,  _______,  ROUT_FM, ROUT_TG, ROUT_VD, ROUT_VI, _______,   _______, _______, _______,
         RGB_M_P, _______, RGB_SAI, _______,  RGB_HUI, _______, _______, U_T_AUTO, U_T_AGCR, _______, _______, _______, _______, _______,   DM_REC1, DM_REC2, _______,
         _______, RGB_SPD, RGB_SAD, RGB_SPI,  RGB_HUD, _______, _______, _______,  _______,  _______, _______, _______, _______,
         _______, DM_PLY1, DM_PLY2, COPY_ALL, _______, MD_BOOT, TG_NKRO, _______,  _______,  _______, _______, _______,                              TG(_ML),
         _______, _______, _______,                    _______,                              _______, TG(_FL), _______, _______,            _______, _______, _______
     ),
     [_ML] = LAYOUT(
-        _______, KC_ACL0, KC_ACL1, KC_ACL2, _______, _______, _______, _______, _______, _______, _______, _______, _______,            _______, _______, _______,
+        DBG_TOG, KC_ACL0, KC_ACL1, KC_ACL2, _______, _______, _______, _______, _______, _______, _______, _______, _______,            _______, _______, _______,
         _______, KC_BTN4, KC_BTN3, KC_BTN5, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______,   _______, _______, _______,
         _______, KC_BTN1, KC_MS_U, KC_BTN2, KC_WH_U, _______, _______, _______, _______, _______, _______, _______, _______, _______,   _______, _______, _______,
         _______, KC_MS_L, KC_MS_D, KC_MS_R, KC_WH_D, _______, _______, _______, _______, _______, _______, _______, _______,
         _______, _______, _______, SEL_CPY, _______, _______, _______, _______, _______, _______, _______, _______,                              KC_MS_U,
         _______, TG(_ML), _______,                   _______,                            _______, TG(_ML), _______, _______,            KC_MS_L, KC_MS_D, KC_MS_R
+    ),
+    [_GL] = LAYOUT(
+        _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______,            _______, _______, _______,
+        _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______,   _______, _______, _______,
+        _______, _______, _______, _______, G_REMTE, G_RESET, G_REBAS, _______, G_INIT,  _______, G_PULL,  G_PUSH,  _______,  _______,   _______, _______, _______,
+        _______, G_ADD,   G_STAT,  G_DIFF,  G_FETCH, _______, _______, _______, _______, G_LOG,   _______, _______, _______,
+        _______, G_CONF,  G_CHECK, G_CLONE, G_COMM,  G_BRANH, _______, G_MERGE, _______, _______, _______, _______,                              _______,
+        TG(_GL), _______, _______,                   _______,                            _______, TG(_GL), _______, _______,            _______, _______, _______
     ),
     // This layout doesn't have custom keycodes for now, just custom LED config
     [_VL] = LAYOUT(
@@ -217,7 +238,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 
 const uint8_t PROGMEM ledmap[][DRIVER_LED_TOTAL][3] = {
     [_FL] = {
-        PINK, TEAL  ,  TEAL,   TEAL ,   TEAL ,   TEAL  ,   TEAL   , SPRING , SPRING , ORANGE ,   ORANGE, ORANGE ,  ORANGE,          _______,  GOLD  ,    GOLD   ,
+        _______, TEAL  ,  TEAL,   TEAL ,   TEAL ,   TEAL  ,   TEAL   , SPRING , SPRING , ORANGE ,   ORANGE, ORANGE ,  ORANGE,          _______,  GOLD  ,    GOLD   ,
         _______, CHART , CHART,   CHART,   CHART,   CHART ,   _______, _______, _______, GREEN  ,   GREEN ,   GREEN,   GREEN, _______, _______, _______,    _______,
         ORANGE ,_______,ORANGE, _______,  ORANGE,  _______,  _______ , AZURE  ,   AZURE, _______,  _______, _______, _______, _______,  CORAL ,   CORAL,    _______,
         _______, ORANGE,  ORANGE, ORANGE,  ORANGE, _______,  _______ , _______, _______, _______,  _______, _______, _______,
@@ -225,21 +246,21 @@ const uint8_t PROGMEM ledmap[][DRIVER_LED_TOTAL][3] = {
         _______,_______, _______,                  _______,                                _______, PINK,    _______, _______,            _______,_______,  _______
     },
     [_ML] = {
-        _______, GOLD,    GOLD,    GOLD,   _______, _______, _______, _______, _______, _______, _______, _______, _______,          _______, _______, _______,
+        PINK, GOLD,    GOLD,    GOLD,   _______, _______, _______, _______, _______, _______, _______, _______, _______,          _______, _______, _______,
         _______, MAGENT,  MAGENT,  MAGENT, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______,
         _______, MAGENT,  GOLD,    MAGENT, GOLD,    _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______,
         _______, GOLD,    GOLD,    GOLD,   GOLD,    _______, _______, _______, _______, _______, _______, _______, _______,
         _______, _______, _______, CORAL,  _______, _______, _______, _______, _______, _______, _______, _______,                            YELLOW,
         _______, PINK,    _______,                  _______,                                     _______, PINK,    _______, _______, YELLOW, YELLOW,  YELLOW
     },
-    // [_GL] = {
-    //     _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______,            _______, _______, _______,
-    //     _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______,   _______, _______, _______,
-    //     _______, CORAL,   ORANGE,  _______, BLUE,    AZURE,   AZURE,   GREEN,   CYAN,    _______, TURQ,    PURPLE,  PURPLE,  _______,   _______, _______, _______,
-    //     _______, CORAL,   GREEN,   GREEN,   TURQ,    _______, _______, _______, _______, GREEN,   _______, _______, _______,
-    //     _______, CYAN,    CHART,   TURQ,    ORANGE,  CHART,   _______, CHART,   _______, _______, _______, _______,                              _______,
-    //     _______, _______, _______,                   _______,                            _______, PINK,    _______, _______,            _______, _______, _______
-    // },
+    [_GL] = {
+        _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______,            _______, _______, _______,
+        _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______,   _______, _______, _______,
+        _______, _______, _______, _______, BLUE,    AZURE,   AZURE,   _______,   CYAN,    _______, TURQ,    PURPLE,  _______,  _______,   _______, _______, _______,
+        _______, CORAL,   GREEN,   GREEN,   TURQ,    _______, _______, _______, _______, GREEN,   _______, _______, _______,
+        _______, CYAN,    CHART,   TURQ,    ORANGE,  CHART,   _______, CHART,   _______, _______, _______, _______,                              _______,
+        PINK, _______, _______,                   _______,                            _______, PINK,    _______, _______,            _______, _______, _______
+    },
     [_VL] = {
         PURPLE,  _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______,          _______, _______, _______,
         _______, _______, _______, TURQ,    _______, _______, _______, _______, TURQ,    _______, _______, _______, _______, _______, _______, _______, _______,
@@ -344,99 +365,6 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
 
     if (record->event.pressed) {
         switch (keycode) {
-            case KC_5:
-                if(biton32(layer_state) == 1){
-                    if (shift_mask) {
-                        unregister_code(KC_LSFT);
-                        unregister_code(KC_RSFT);
-                        send_keyboard_report();
-
-                        send_altcode(217, record);
-
-                        if (shift_mask &MOD_BIT(KC_LSFT)) register_code(KC_LSFT);
-                        if (shift_mask &MOD_BIT(KC_RSFT)) register_code(KC_RSFT);
-
-                        send_keyboard_report();
-                    } else {
-                        send_altcode(249, record); // u
-                    }
-                }
-                else {
-                    return true;
-                }
-                return false;
-                break;
-    		case ACT_E2:
-                // Sometime recorded for a 'a'. So had to custom condition.
-                if(record->event.key.row > 1)
-                    break;
-                if (shift_mask) {
-                    unregister_code(KC_LSFT);
-                    unregister_code(KC_RSFT);
-                    send_keyboard_report();
-
-                    send_altcode(200, record);
-
-                    if (shift_mask &MOD_BIT(KC_LSFT)) register_code(KC_LSFT);
-                    if (shift_mask &MOD_BIT(KC_RSFT)) register_code(KC_RSFT);
-
-                    send_keyboard_report();
-                } else {
-                    send_altcode(232, record);
-                }
-                return false;
-                break;
-            case ACT_E1:
-                if (shift_mask) {
-                    unregister_code(KC_LSFT);
-                    unregister_code(KC_RSFT);
-                    send_keyboard_report();
-
-                    send_altcode(201, record);
-
-                    if (shift_mask &MOD_BIT(KC_LSFT)) register_code(KC_LSFT);
-                    if (shift_mask &MOD_BIT(KC_RSFT)) register_code(KC_RSFT);
-
-                    send_keyboard_report();
-                } else {
-                    send_altcode(233, record);
-                }
-                return false;
-                break;
-            case ACT_C:
-             if (shift_mask) {
-                    unregister_code(KC_LSFT);
-                    unregister_code(KC_RSFT);
-                    send_keyboard_report();
-
-                    send_altcode(199, record);
-
-                    if (shift_mask &MOD_BIT(KC_LSFT)) register_code(KC_LSFT);
-                    if (shift_mask &MOD_BIT(KC_RSFT)) register_code(KC_RSFT);
-
-                    send_keyboard_report();
-                } else {
-                    send_altcode(231, record);
-                }
-                return false;
-                break;
-            case ACT_A:
-                 if (shift_mask) {
-                    unregister_code(KC_LSFT);
-                    unregister_code(KC_RSFT);
-                    send_keyboard_report();
-
-                    send_altcode(192, record);
-
-                    if (shift_mask &MOD_BIT(KC_LSFT)) register_code(KC_LSFT);
-                    if (shift_mask &MOD_BIT(KC_RSFT)) register_code(KC_RSFT);
-
-                    send_keyboard_report();
-                } else {
-                    send_altcode(224, record);
-                }
-                return false;
-                break;
             case DBG_TOG:
                 TOGGLE_FLAG_AND_PRINT(debug_enable, "Debug mode");
                 return false;
@@ -517,6 +445,89 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
                 }
                 rgb_time_out_fast_mode_enabled = !rgb_time_out_fast_mode_enabled;
                 return false;
+    		case ACT_E2:
+                if (shift_mask) {
+                    unregister_code(KC_LSFT);
+                    unregister_code(KC_RSFT);
+                    send_keyboard_report();
+
+                    send_altcode(200, record);
+
+                    if (shift_mask &MOD_BIT(KC_LSFT)) register_code(KC_LSFT);
+                    if (shift_mask &MOD_BIT(KC_RSFT)) register_code(KC_RSFT);
+
+                    send_keyboard_report();
+                } else {
+                    send_altcode(232, record);
+                }
+                return false;
+            case ACT_E1:
+                if (shift_mask) {
+                    unregister_code(KC_LSFT);
+                    unregister_code(KC_RSFT);
+                    send_keyboard_report();
+
+                    send_altcode(201, record);
+
+                    if (shift_mask &MOD_BIT(KC_LSFT)) register_code(KC_LSFT);
+                    if (shift_mask &MOD_BIT(KC_RSFT)) register_code(KC_RSFT);
+
+                    send_keyboard_report();
+                } else {
+                    send_altcode(233, record);
+                }
+                return false;
+            case ACT_C:
+             if (shift_mask) {
+                    unregister_code(KC_LSFT);
+                    unregister_code(KC_RSFT);
+                    send_keyboard_report();
+
+                    send_altcode(199, record);
+
+                    if (shift_mask &MOD_BIT(KC_LSFT)) register_code(KC_LSFT);
+                    if (shift_mask &MOD_BIT(KC_RSFT)) register_code(KC_RSFT);
+
+                    send_keyboard_report();
+                } else {
+                    send_altcode(231, record);
+                }
+                return false;
+            case ACT_U:
+                 if (shift_mask) {
+                    unregister_code(KC_LSFT);
+                    unregister_code(KC_RSFT);
+                    send_keyboard_report();
+
+                    send_altcode(217, record);
+
+                    if (shift_mask &MOD_BIT(KC_LSFT)) register_code(KC_LSFT);
+                    if (shift_mask &MOD_BIT(KC_RSFT)) register_code(KC_RSFT);
+
+                    send_keyboard_report();
+                } else {
+                    send_altcode(249, record);
+                }
+                return false;
+            case ACT_A:
+                 if (shift_mask) {
+                    unregister_code(KC_LSFT);
+                    unregister_code(KC_RSFT);
+                    send_keyboard_report();
+
+                    send_altcode(192, record);
+
+                    if (shift_mask &MOD_BIT(KC_LSFT)) register_code(KC_LSFT);
+                    if (shift_mask &MOD_BIT(KC_RSFT)) register_code(KC_RSFT);
+
+                    send_keyboard_report();
+                } else {
+                    send_altcode(224, record);
+                }
+                return false;
+            case G_INIT ... G_LOG:
+                send_string_with_delay(sendstring_commands[keycode - G_INIT], 5);
+                return false;
         }
     }
     return true;
@@ -534,9 +545,10 @@ void set_layer_color(int layer) {
             RGB rgb = hsv_to_rgb(hsv);
             float f = (float)rgb_matrix_config.hsv.v / UINT8_MAX;
             rgb_matrix_set_color(i, f * rgb.r, f * rgb.g, f * rgb.b);
-        } else if (layer != 1) {
+        } else if (layer > 0) {
             // Only deactivate non-defined key LEDs at layers other than FN. Because at FN we have RGB adjustments and need to see them live.
             // If the values are all false then it's a transparent key and deactivate LED at this layer
+            // CAREFUL : layer > 0 deactivate the LED at the first layer. To see change live, set it to 1.
             rgb_matrix_set_color(i, 0, 0, 0);
         }
     }
